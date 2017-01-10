@@ -1,6 +1,6 @@
 # firejail advisory for TOCTOU in --get and --put (local root)
 
-Releasing a brief advisory/writeup about a local root privesc found in firejail that we reported back in Nov, 2016. This is in response to a recent [thread](http://seclists.org/oss-sec/2017/q1/20) on full disclosure where people seem interested in details of firejail security issues. This particular vulnerability was fixed in commit [e152e2d](https://github.com/netblue30/firejail/commit/e152e2d067e17be33c7e82ce438c8ae740af6a66) but no CVE was assigned.
+Releasing a brief advisory/writeup about a local root privesc found in firejail that we reported back in Nov, 2016. This is in response to a recent [thread](http://seclists.org/oss-sec/2017/q1/20) on oss-sec where people seem interested in details of firejail security issues. This particular vulnerability was fixed in commit [e152e2d](https://github.com/netblue30/firejail/commit/e152e2d067e17be33c7e82ce438c8ae740af6a66) but no CVE was assigned.
 
 ## Vulnerability
 
