@@ -259,7 +259,7 @@ RUN apt-get update && apt-get install -y git gcc make
 RUN useradd -ms /bin/bash daniel && echo "daniel:password" | chpasswd
 RUN git clone https://github.com/netblue30/firejail.git ${wdir}
 WORKDIR ${wdir}
-git reset --hard 81467143ee9c47d9c90e97fb55baf2d47702d372
+RUN git reset --hard 81467143ee9c47d9c90e97fb55baf2d47702d372
 RUN ./configure && make && make install
 ~~~~
 
