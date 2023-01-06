@@ -14,7 +14,7 @@ Inkscape is an opensource and cross-platform vector graphics editor, offering a 
 
 ### Description
 
-Inkscape added support for XML XInclude in Merge Request https://gitlab.com/inkscape/inkscape/-/merge_requests/1150[1150] in late 2019, that introduced a local file disclosure vulnerability.
+Inkscape added support for XML XInclude in Merge Request [1150](https://gitlab.com/inkscape/inkscape/-/merge_requests/1150) in late 2019, that introduced a local file disclosure vulnerability.
 
 If an attacker can inject a `xi:include` XML tag into the input SVG, it will include the contents of the referenced local file in the output data of a generated PDF.
 
