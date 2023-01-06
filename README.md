@@ -11,7 +11,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 | 2022 | writeup | - | LFI in inkscape via SVG injection | [inkscape-xml.md](./writeups/inkscape-xml.md)
 | 2021 | preso | Yascon 2021 | Canotary: How to find and bypass Canarytokens | [github.com](https://github.com/loltan/Canotary), [youtube.com](https://www.youtube.com/watch?v=hkuiuppJQDs&t=3002s) |
 | 2021 | preso | ISACA Melbourne | IoT Security Assessment Insights | [pptx slides](./slides/Matt%20-%20ISACA%20Melb%202021%20-%20IoT%20Security%20Assessment%20Insights.pptx) |
-| 2020 | adv | - | FreeBSD kernel fs info leaks | [cve-2020-25578.txt](./writeups/cve-2020-25578.txt), [cve-2020-25579.txt](./writeups/cve-2020-25579.txt) | 
+| 2020 | adv | - | FreeBSD kernel fs info leaks | [cve-2020-25578.txt](./writeups/CVE-2020-25578.txt), [cve-2020-25579.txt](./writeups/CVE-2020-25579.txt) | 
 | 2020 | poc | - | Tuya IoT EZ Mode (Tuya Link) WiFi Credential Sniffer | [tuya-live-extract.py](./writeups/tuya-live-extract.py) |
 | 2020 | preso | Airgap 2020 | haha v8 engine go brrrrr | [youtube.com](https://www.youtube.com/watch?v=i9O_vYQbZEo) |
 | 2019 | preso | BSides Perth | Understanding the Chromium Sandbox on Windows | [pptx slides](./slides/Matt%20-%20Bsides%20Per%202019%20-%20Chromium%20Sandbox%20-%20General.pptx) | 
