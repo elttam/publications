@@ -6,7 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
-| 2022 | adv | - | Memory corruption in libksba | [CVE-2022-3515.md](./writeups/CVE-2020-3515.md) | 
+| 2022 | adv | - | Memory corruption in libksba | [CVE-2022-3515.md](./writeups/CVE-2022-3515.md) | 
 | 2022 | preso | Budapest Infosec Meetup | Airplane Hacking | [airplane-hacking.pdf](./slides/airplane-hacking.pdf) | 
 | 2022 | writeup | - | LFI in inkscape via SVG injection | [inkscape-xml.md](./writeups/inkscape-xml.md)
 | 2021 | preso | Yascon 2021 | Canotary: How to find and bypass Canarytokens | [github.com](https://github.com/loltan/Canotary), [youtube.com](https://www.youtube.com/watch?v=hkuiuppJQDs&t=3002s) |
