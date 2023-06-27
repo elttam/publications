@@ -6,7 +6,8 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
-| 2023 | writeup | - | [RCE and other issues](https://www.elttam.com/blog/pwnassistant/) in Home Asisstant | [home-assistant](./writeups/home-assistant/)
+| 2023 | adv | - | Ruby on Rails: Possible XSS via User Supplied Values to redirect_to | [CVE-2023-28362](https://discuss.rubyonrails.org/t/cve-2023-28362-possible-xss-via-user-supplied-values-to-redirect-to/83132) |
+| 2023 | writeup | - | [RCE and other issues](https://www.elttam.com/blog/pwnassistant/) in Home Asisstant | [home-assistant](./writeups/home-assistant/) |
 | 2023 | preso | Ruxmon Melbourne | Cracking the odd case of randomness in Java | [pdf slides](./slides/joseph-ruxmon-02_2023-cracking-the-odd-case-of-randomness-in-java.pdf) |
 | 2022 | adv | - | Memory corruption in libksba | [CVE-2022-47629.md](./writeups/CVE-2022-47629.md) | 
 | 2022 | preso | Budapest Infosec Meetup | Airplane Hacking | [airplane-hacking.pdf](./slides/airplane-hacking.pdf) | 
