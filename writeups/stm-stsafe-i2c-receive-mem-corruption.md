@@ -1,5 +1,6 @@
 # Introduction
-This write-up describes a buffer overflow vulnerability in the STSAFE-A100 sample [applications](https://www.st.com/en/embedded-software/x-cube-safea1.html).
+This write-up describes a buffer overflow vulnerability in v1.2.0 of the X-CUBE-SAFEA1 Software Package for STSAFE-A [sample applications](https://www.st.com/en/embedded-software/x-cube-safea1.html).
+To be more specific, the vulnerable code is in v3.3.6 and below of the STSAFE-Axx middleware within the package.
 We identified this bug during our investigations of the STSAFE-A110 secure element.
 
 # Overview
@@ -178,8 +179,9 @@ Furthermore, because the vulnerability exists in the method that handles respons
 
 However, upon successful exploitation the attacker could achieve code execution on the MCU.
 
-# Discovery
+# Timeline
 
-* July 2023, Zoltan Madarassy, elttam
-
-
+* July, 2023 - Vulnerability identified by Zoltan Madarassy, elttam
+* 23 Aug, 2023 - Vulnerability reported to ST PSIRT
+* 10 Oct, 2023 - Fixed version (v3.3.7) of the STSAFE-A1xx middleware published by ST
+* 1 Dec, 2023 - Advisory published and CVE requested
