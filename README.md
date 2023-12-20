@@ -6,6 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2023 | adv | - | Apache Guacamole: Integer overflow in handling of VNC image buffers | [CVE-2023-43826.md](./writeups/CVE-2023-43826.md) |
 | 2023 | adv | - | STMicroelectronics STSAFE: I2C Receive buffer overflow | [stm-stsafe-i2c-receive-mem-corruption.md](./writeups/stm-stsafe-i2c-receive-mem-corruption.md) |
 | 2023 | adv | - | Label Studio: Hardcoded Django SECRET_KEY that can be Abused to Forge Session Tokens | [CVE-2023-43791.md](./writeups/CVE-2023-43791.md) | 
 | 2023 | adv | - | Label Studio: Object Relational Mapper Leak Vulnerability in Filtering Task | [CVE-2023-47117.md](./writeups/CVE-2023-47117/CVE-2023-47117.md) | 
