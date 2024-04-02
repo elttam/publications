@@ -6,6 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2024 | adv | - | OTA Anti-Rollback Bypass via TOCTOU in ESP-IDF | [CVE-2024-28183.md](./writeups/CVE-2024-28183/CVE-2024-28183.md) [GHSA-22x6-3756-pfp8](https://github.com/espressif/esp-idf/security/advisories/GHSA-22x6-3756-pfp8) |
 | 2023 | adv | - | Apache Guacamole: Integer overflow in handling of VNC image buffers | [CVE-2023-43826.md](./writeups/CVE-2023-43826.md) |
 | 2023 | adv | - | STMicroelectronics STSAFE: I2C Receive buffer overflow | [CVE-2023-50096.md](./writeups/CVE-2023-50096.md) |
 | 2023 | adv | - | Label Studio: Hardcoded Django SECRET_KEY that can be Abused to Forge Session Tokens | [CVE-2023-43791.md](./writeups/CVE-2023-43791.md) | 
