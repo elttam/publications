@@ -6,6 +6,8 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2024 | preso | Ruxmon Melbourne | Causing Funky Things in your NodeJS Servers | [pdf slides](./slides/Causing%20Funky%20Things%20in%20your%20NodeJS%20Web%20Servers.pdf) |
+| 2024 | preso | CrikeyCon | Keeping up with the Pwnses: An overview of Talkback | [pdf slides](./slides/Keeping%20up%20with%20the%20Pwnses%20-%20CrikeyCon.pdf) |
 | 2024 | adv | - | OTA Anti-Rollback Bypass via TOCTOU in ESP-IDF | [CVE-2024-28183.md](./writeups/CVE-2024-28183/CVE-2024-28183.md) [GHSA-22x6-3756-pfp8](https://github.com/espressif/esp-idf/security/advisories/GHSA-22x6-3756-pfp8) |
 | 2023 | adv | - | Apache Guacamole: Integer overflow in handling of VNC image buffers | [CVE-2023-43826.md](./writeups/CVE-2023-43826.md) |
 | 2023 | adv | - | STMicroelectronics STSAFE: I2C Receive buffer overflow | [CVE-2023-50096.md](./writeups/CVE-2023-50096.md) |
@@ -18,11 +20,11 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 | 2022 | adv | - | Memory corruption in libksba | [CVE-2022-47629.md](./writeups/CVE-2022-47629.md) | 
 | 2022 | preso | Budapest Infosec Meetup | Airplane Hacking | [airplane-hacking.pdf](./slides/airplane-hacking.pdf) | 
 | 2022 | writeup | - | LFI in inkscape via SVG injection | [inkscape-xml.md](./writeups/inkscape-xml.md)
-| 2021 | preso | Yascon 2021 | Canotary: How to find and bypass Canarytokens | [github.com](https://github.com/loltan/Canotary), [youtube.com](https://www.youtube.com/watch?v=hkuiuppJQDs&t=3002s) |
+| 2021 | preso | Yascon | Canotary: How to find and bypass Canarytokens | [github.com](https://github.com/loltan/Canotary), [youtube.com](https://www.youtube.com/watch?v=hkuiuppJQDs&t=3002s) |
 | 2021 | preso | ISACA Melbourne | IoT Security Assessment Insights | [pptx slides](./slides/Matt%20-%20ISACA%20Melb%202021%20-%20IoT%20Security%20Assessment%20Insights.pptx) |
 | 2020 | adv | - | FreeBSD kernel fs info leaks | [cve-2020-25578.txt](./writeups/CVE-2020-25578.txt), [cve-2020-25579.txt](./writeups/CVE-2020-25579.txt) | 
 | 2020 | poc | - | Tuya IoT EZ Mode (Tuya Link) WiFi Credential Sniffer | [tuya-live-extract.py](./writeups/tuya-live-extract.py) |
-| 2020 | preso | Airgap 2020 | haha v8 engine go brrrrr | [youtube.com](https://www.youtube.com/watch?v=i9O_vYQbZEo) |
+| 2020 | preso | Airgap | haha v8 engine go brrrrr | [youtube.com](https://www.youtube.com/watch?v=i9O_vYQbZEo) |
 | 2019 | preso | BSides Perth | Understanding the Chromium Sandbox on Windows | [pptx slides](./slides/Matt%20-%20Bsides%20Per%202019%20-%20Chromium%20Sandbox%20-%20General.pptx) | 
 | 2019 | preso | OWASP Australia | Secure SDLC Speedrun | [youtube.com](https://www.youtube.com/watch?v=85GFFTagSf8) | 
 | 2019 | preso | OWASP Australia | Session IPA: Sessions' Interesting Protection Anomalies | [youtube.com](https://www.youtube.com/watch?v=NMwng5L6kOw), [pdf slides](./slides/Luke%20(and%20Louis)%20-%20OWASP%202019%20-%20Session%20IPA.pdf) | 
