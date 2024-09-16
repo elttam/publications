@@ -6,6 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2024 | preso | Appsec and Devsecops Summit Melbourne | Adaptive Code Assisted Security Assessments | [pdf slides](./slides/Adaptive%20Code%20Assisted%20Security%20Assessments%20-%20Sep%202024.pdf) |
 | 2024 | preso | Ruxmon Melbourne | Causing Funky Things in your NodeJS Servers | [pdf slides](./slides/Causing%20Funky%20Things%20in%20your%20NodeJS%20Web%20Servers.pdf) |
 | 2024 | preso | CrikeyCon | Keeping up with the Pwnses: An overview of Talkback | [pdf slides](./slides/Keeping%20up%20with%20the%20Pwnses%20-%20CrikeyCon.pdf) |
 | 2024 | adv | - | OTA Anti-Rollback Bypass via TOCTOU in ESP-IDF | [CVE-2024-28183.md](./writeups/CVE-2024-28183/CVE-2024-28183.md) [GHSA-22x6-3756-pfp8](https://github.com/espressif/esp-idf/security/advisories/GHSA-22x6-3756-pfp8) |
