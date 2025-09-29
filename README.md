@@ -6,6 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2025 | adv | - | Beego Method Override Could Bypass Before Filters <=2.3.8 | [beego-router-filter-bypass.md](./writeups/beego/beego-router-filter-bypass.md) |
 | 2024 | preso | BSides Canberra | Boot Security in the MCU | [repo](https://github.com/elttam/boot-security-in-the-mcu) |
 | 2024 | preso | AISA CyberCon | The 7 Habits of Highly Mature Products | [pdf slides](./slides/Jamie%20-%20AISA%20Cybercon%202024%20-%20The%207%20Habits%20of%20Highly%20Mature%20Products.pdf) |
 | 2024 | preso | Appsec and Devsecops Summit Melbourne | Adaptive Code Assisted Security Assessments | [pdf slides](./slides/Adaptive%20Code%20Assisted%20Security%20Assessments%20-%20Sep%202024.pdf) |
