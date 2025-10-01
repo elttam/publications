@@ -144,7 +144,7 @@ func TestAuthFilterBypass(t *testing.T) {
     /home/ghostccamm/Documents/Research/beego/beego/server/web/filter/authz/authz_test.go:134: alice, /endpoint?_method=PUT, POST, reponse body: put, supposed to be 403 Forbidden <1>
 --- FAIL: TestAuthzFilterBypass (0.00s)
 ```
-1. Response body returned `put`, indicating the `Post()` controller method is executed that the test user was not authorised to access.
+1. Response body returned `put`, indicating the `Put()` controller method is executed that the test user was not authorised to access.
 
 *Test output for the `TestAuthFilterBypass` test case.*
 ```
@@ -152,7 +152,7 @@ func TestAuthFilterBypass(t *testing.T) {
     /home/ghostccamm/Documents/Research/beego/beego/server/web/filter/authz/authz_test.go:134: anon, /endpoint?_method=PUT, POST, reponse body: put, supposed to be post <1>
 --- FAIL: TestAuthFilterBypass (0.00s)
 ```
-1. The `Post()` controller method was executed, which should have only been accessible from the `/admin/endpoint` route that required authentication.
+1. The `Put()` controller method was executed, which should have only been accessible from the `/admin/endpoint` route that required authentication.
 
 The following example application and demonstration was also provided to the Beego development team.
 
