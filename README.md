@@ -6,6 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2026 | preso | ACISP | Offensive Security Considered Offensive | [slides](./slides/acisp_talk_final.pdf) |
 | 2026 | adv | - | Multiple vulnerabilities in Jupyter Enterprise Gateway | [writeups/jupyter-server/enterprise-gateway/](./writeups/jupyter-server/enterprise-gateway/) |
 | 2025 | preso | BSidesCBR | Primitives for Security Audits: Lessons from Jakarta Mail | [slides](./slides/Primitives%20for%20Security%20Audits%20-%20Lessons%20from%20Jakarta%20Mail%20-%20For%20Dist.pdf) |
 | 2025 | adv | - | Beego Method Override Could Bypass Before Filters <=2.3.8 | [beego-router-filter-bypass.md](./writeups/beego/beego-router-filter-bypass.md) |
