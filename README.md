@@ -6,7 +6,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
-| 2026 | preso | Sectalks Perth | Your House has an FFMpeg Problem [pdf slides](./slides/Your_House_Has_An_FFmpeg_Problem.pptx.pdf) |
+| 2026 | preso | Sectalks Perth | Your House has an FFMpeg Problem | [pdf slides](./slides/Your_House_Has_An_FFmpeg_Problem.pptx.pdf) |
 | 2026 | preso | BSides Adelaide | Gatecrash: Jupyter Enterprise Gateway  | [pdf slides](./slides/gatecrash) |
 | 2026 | preso | ACISP | Offensive Security Considered Offensive | [pdf slides](./slides/acisp_talk_final.pdf) |
 | 2026 | adv | - | Multiple vulnerabilities in Jupyter Enterprise Gateway | [jupyter-server/enterprise-gateway/](./writeups/jupyter-server/enterprise-gateway/) |
