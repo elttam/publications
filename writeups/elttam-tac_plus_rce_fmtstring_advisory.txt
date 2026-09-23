@@ -1,0 +1,313 @@
+=============================================================================
+                                                            Security Advisory
+                                                                       elttam
+
+Topic:          Remote pre-authentication format string vulnerability in
+                tac_plus send_authen_error() (CWE-134)
+
+Module:         packet.c - send_authen_error() / get_authen_continue()
+
+CVE:            <CVE-PENDING>
+Severity:       Critical - CVSS v3.1 9.8
+                (AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H, elttam assessment)
+                9.8 applies where no shared secret is in effect, or where
+                the configured secret is weak. Where the secret is long,
+                random and unique, AC:H is the better fit, giving 8.1 High.
+                See section III.
+
+Disclosed:      23-Sep-2026
+Credits:        Matt Jones, elttam
+
+Affects:        Shrubbery Networks tac_plus, up to and including F4.0.4.31
+                (Feb-2026). Both sinks described below are present in that
+                release. Fixed in F4.0.4.32, published 21-Sep-2026.
+
+                Note that F4.0.4.31 was the first official release since
+                F4.0.4.28 (06-Jan-2015). Through that eleven-year interval
+                distributions and downstream maintainers carried their own
+                patches against F4.0.4.28, so a given installation may not
+                correspond to any upstream release. Version strings alone
+                are not a reliable test; check for the sinks in the source
+                actually built.
+
+                Facebook tac_plus, F4.0.4.28-7fb. The send_authen_error()
+                sink is present; get_authen_continue() in this fork already
+                passes a constant format string and is not affected. The
+                repository was archived on 22-Aug-2025 and is read-only.
+
+                Other Cisco-derived forks carrying the same report() and
+                send_authen_error() code should be assumed affected. The
+                only actively packaged copies found are the FreeBSD port
+                net/tac_plus4 and the pkgsrc entries net/tacacs-shrubbery
+                and net/tacacs. Debian removed its tacacs+ package in
+                September 2019 at 4.0.4.27a-3, Ubuntu carries it in
+                universe on older LTS suites only, and Arch ships it only
+                in the AUR.
+                "Cisco-derived" refers to the historical open-source TACACS+
+                reference server published by Cisco, from which these
+                third-party forks descend.
+                Cisco PSIRT has confirmed that no Cisco product uses the
+                Shrubbery or Facebook forks, or Cisco's own original version
+                of that code, and that no Cisco product is affected.
+
+Note:           Line numbers in this advisory refer to the Shrubbery
+                F4.0.4.31 source tree. Offsets differ in other forks; in
+                F4.0.4.28-7fb the send_authen_error() sink is at
+                approximately packet.c:223.
+
+I.   Background
+
+tac_plus implements the TACACS+ AAA protocol used by network devices for
+administrative login and command authorization. It listens on TCP port 49 and
+typically runs as root.
+
+Errors are logged through a printf-style helper, report(int priority, char
+*fmt, ...) (report.c:51), which passes fmt directly to vsnprintf()
+(report.c:70). Any conversion specifiers in fmt are therefore expanded against
+the variadic arguments.
+
+II.  Problem Description
+
+send_authen_error() builds a message from caller and session data, then passes
+it to report() as the format string rather than as a data argument:
+
+    packet.c:235  snprintf(buf, sizeof(buf), "%s %s: %s", session.peer,
+                           session.port, msg);
+    packet.c:238  report(LOG_ERR, buf);          /* buf is the format string */
+
+buf embeds session.port, which is attacker-controlled: it is copied verbatim
+from the "port" field of the client's AUTHEN/START request with no validation
+or character restriction (authen.c:108-114; the same applies to AUTHOR and
+ACCT requests). A client that places conversion specifiers such as %x or %n in
+that field has them interpreted by report()'s vsnprintf() against arguments
+that were never supplied. When peer-name lookups are enabled (-L), the
+reverse-DNS name in session.peer is a second tainted source in the same
+buffer.
+
+The same mistake appears in get_authen_continue() in the Shrubbery tree, which
+passes a message containing session.peer straight to report() as the format
+string:
+
+    packet.c:61   report(LOG_ERR, msg);          /* msg is the format string */
+
+III. Impact
+
+This is a remote, pre-authentication format string vulnerability in a service
+that runs as root by default; privileges are dropped only when the daemon is
+invoked with -U or -Q. The %x and %s specifiers disclose process memory into
+the daemon's log, and %n writes to memory, enabling memory corruption and
+remote code execution as the daemon user.
+
+report() expands the format string into a buffer of its own and does not
+modify buf, so the AUTHEN reply sent by send_authen_reply() carries the
+specifiers verbatim rather than expanded.
+There is no read-back channel to the client, and the write primitive is
+therefore blind. This has been confirmed against a running daemon.
+
+elttam has confirmed remote code execution against a build with ASLR and NX
+disabled. Exploitation of a hardened build carrying the full set of
+mitigations is believed to be achievable, since the daemon forks a child per
+connection without exec(), so address layout is stable for the life of the
+process and a failed attempt costs only that child. Compromise of the daemon
+can cascade into control of the network devices that rely on it for
+administrative access.
+
+No user credentials are required: the vulnerable path is reached before
+authentication. Exploitation does, however, depend on the TACACS+ obfuscation
+layer:
+
+* Where no shared secret is configured, or the client sets the unencrypted
+  flag and the daemon accepts it, an attacker needs only network reach to
+  TCP/49 to place a chosen payload in the port field.
+
+* Where a shared secret is configured, the request body is obfuscated with a
+  key the daemon must be able to reproduce, so delivering a chosen payload
+  requires knowledge of that key.
+
+How much protection that key provides depends on its quality rather than its
+presence. send_authen_error() returns a reply before the peer has proven any
+knowledge of the key, and the plaintext of that reply is predictable to the
+client that requested it, which permits offline verification of candidate
+keys from a single connection with no captured traffic and no on-path
+position. elttam has confirmed this in practice against a weak key. This
+behaviour is a property of the TACACS+ obfuscation scheme, described by Solar
+Designer in 2000 and superseded by RFC 9887, rather than a separate defect in
+tac_plus; it is not the subject of this advisory, has no CVE assigned, and
+was not separately reported.
+
+The two ratings above follow from that. Where no secret is in effect, or the
+secret is weak, guessable or shared with other systems, the attacker needs
+only network reach to TCP/49, giving 9.8. Where the secret is long, random
+and unique, AC:H is the better fit, giving 8.1.
+
+IV.  Solution
+
+Shrubbery Networks responded on 01-Sep-2026, after the report was recovered
+from a mailing list spam queue, and published F4.0.4.32 on 21-Sep-2026 with
+a fix for both sinks. elttam has verified that release: both calls now pass
+a constant format string, at packet.c:61 and packet.c:238, the same line
+numbers as in F4.0.4.31. Operators running the Shrubbery fork should upgrade
+to that release. Note that F4.0.4.32 is now the only version available in
+Shrubbery's download directory; the earlier tarballs have been removed.
+
+The Facebook repository was archived on 22-Aug-2025 and is read-only, so no
+fix will be issued there. Operators of that fork, of other Cisco-derived
+forks, or of distribution packages that have not yet picked up the fixed
+release, should assume they must patch their own builds, or migrate to
+another implementation.
+
+Pass a constant format string and supply the data as an argument at both
+sinks:
+
+    packet.c:238   report(LOG_ERR, buf);   ->   report(LOG_ERR, "%s", buf);
+    packet.c:61    report(LOG_ERR, msg);   ->   report(LOG_ERR, "%s", msg);
+
+The strategic fix is to stop relying on the obfuscation layer at all.
+RFC 9887 (December 2025, Standards Track) specifies TACACS+ over TLS 1.3 and
+obsoletes obfuscation, stating that new production deployments SHOULD use TLS
+authentication and encryption. Operators with a migration path to a TLS-
+capable implementation should take it.
+
+More broadly, audit every report(), syslog() and *printf() call so that the
+format argument is always a string literal and never runtime data. Building
+with -Wformat -Wformat-security -Werror=format-security flags the remaining
+cases at compile time. Request-derived values - the NAS port field, and
+DNS-derived peer names when -L is used - should be treated as untrusted
+input.
+
+V.   Workarounds
+
+Operators who cannot rebuild the daemon should consider the following. None
+of these fully remediate the vulnerability.
+
+* Restrict TCP/49 to trusted NAS management addresses at the network layer.
+* Use a long, random, unique shared secret. Any secret a wordlist or
+  rule-based attack can reach is equivalent to no secret at all against the
+  oracle in section III. This does not prevent exploitation by a party who
+  already knows the key.
+* Avoid -L, which removes the reverse-DNS peer name as a tainted source. The
+  NAS port field remains attacker-controlled regardless.
+
+elttam does not recommend -U/-Q as a mitigation. The flags work as
+documented, with the daemon binding its listening socket before it calls
+setgid() and setuid(), but they do not prevent exploitation, and the shared
+secret and the credentials the daemon handles are readable by the daemon's
+own account whatever its uid.
+
+VI.  Detection
+
+Exploitation attempts may appear in the daemon's logs as entries whose port
+or peer field contains expanded conversion specifiers, or as truncated or
+malformed report() output. Note that the expansion appears in the log only,
+not in the reply sent to the client. A successful %n write may occur without
+producing a distinctive log entry, so absence of these indicators is not
+evidence that a host was not targeted.
+
+VII. Timeline
+
+* 15-Jan-2026: Initial vulnerability discovery and proof-of-concept
+               development
+* 06-Feb-2026: Reported to the Meta bug bounty program
+* Feb-2026:    Shrubbery published F4.0.4.31, its first official release
+               since 06-Jan-2015. Not noticed by elttam at the time.
+* 15-Apr-2026: Contacted the Meta bug bounty program lead after no response
+* 15-Apr-2026: Meta responded privately, out of band from its bug bounty
+               program, directing elttam to Shrubbery Networks and to
+               Cisco's Bugcrowd program
+* 03-Jun-2026: Reported to Shrubbery Networks via info@shrubbery.net
+* 24-Jun-2026: Follow-up to Shrubbery after no response
+* 15-Jul-2026: Follow-up to Shrubbery after no response
+* 17-Jul-2026: Notified the Australian Cyber Security Centre (ACSC)
+* 07-Aug-2026: Follow-up to Shrubbery regarding the 90-day disclosure
+               deadline, counted from the 03-Jun-2026 report
+* 08-Aug-2026: Notified Cisco PSIRT via psirt@cisco.com
+* 28-Aug-2026: Follow-up to Shrubbery, including tac_plus@shrubbery.net
+* 31-Aug-2026: Cisco PSIRT responded, advising that no Cisco product uses
+               the Shrubbery or Facebook forks, or Cisco's original code
+* 31-Aug-2026: CVE identifier requested by elttam from MITRE
+               (<CVE-PENDING>)
+* 01-Sep-2026: Shrubbery Networks responded, exactly 90 days after the
+               03-Jun-2026 report and on the date elttam was prepared to
+               publish, advising that the report had been held in the
+               mailing list's spam queue, and requesting a non-video
+               demonstration of the issue
+* 01-Sep-2026: elttam provided the advisory and the CVE identifier,
+               and deferred disclosure by a week, from 01-Sep-2026 to
+               07-Sep-2026, asking Shrubbery to confirm by 04-Sep-2026
+               whether a patch and release will be issued
+* 07-Sep-2026: Follow-up to Shrubbery after no confirmation was received by
+               the 04-Sep-2026 deadline
+* 09-Sep-2026: Shrubbery advised that it would be addressed on return to
+               the office on 14-Sep-2026, with nobody available to publish a
+               release before then. Disclosure deferred a second time, from
+               07-Sep-2026 to 15-Sep-2026.
+* 13-Sep-2026: elttam asked Shrubbery to confirm the release and version
+               number once published
+* 16-Sep-2026: Follow-up to Shrubbery after 14-Sep-2026 passed with no
+               release and no further response
+* 17-Sep-2026: Further follow-up to Shrubbery, advising that elttam is ready
+               to publish and has held off to see whether a patched release
+               is forthcoming
+* 21-Sep-2026: Shrubbery published F4.0.4.32 with a fix for both sinks
+* 23-Sep-2026: Public disclosure of advisory
+
+The report was submitted to the Meta bug bounty program on 06-Feb-2026 and
+received no substantive response through that channel. On escalation to the
+program lead on 15-Apr-2026 the submission was located and passed to an
+analyst, with the qualification that scope covers active GitHub projects and
+this one was deprecated, making an end-of-life CVE the likelier outcome than
+a bounty. elttam was also directed to Shrubbery Networks and to Cisco's
+Bugcrowd program. No end-of-life CVE was issued and the analyst review
+produced no further response, so elttam requested the identifier from MITRE
+directly.
+
+elttam approached Meta first because, at the time of discovery, Shrubbery's
+most recent official release was F4.0.4.28 from January 2015, whereas the
+Facebook fork had been maintained publicly until its archival in August 2025,
+making Meta the party most likely to retain familiarity with the code and to
+be positioned to coordinate with others running it. Meta's bug bounty program
+treats the company's active GitHub projects as in scope, and the fork sat
+within that scope from late 2015 until its archival in August 2025, some
+months before elttam reported.
+
+Following that referral, and before contacting Shrubbery Networks, elttam
+attempted to report the issue through Cisco's Bugcrowd program. The intake
+form accepted a basic request but not a full report, and retained no
+submission record or date, so the attempt is not listed in the timeline
+above. The issue was reported directly to psirt@cisco.com on 08-Aug-2026.
+Cisco PSIRT replied on 31-Aug-2026, noting that the original message had been
+caught as spam, and advised that no Cisco product uses the Shrubbery or
+Facebook forks, or Cisco's own original version of that code, and that the
+Developer's Kit was not intended for production use.
+
+Shrubbery Networks did not respond to the initial report or to the four
+follow-ups sent between 03-Jun-2026 and 28-Aug-2026, and replied on
+01-Sep-2026 advising that the correspondence had been held in a mailing list
+spam queue. Disclosure was deferred twice from that point, the second time to
+15-Sep-2026 after Shrubbery advised that the issue would be addressed on its
+return to the office on 14-Sep-2026. That date passed without a release, and
+follow-ups on 13-Sep-2026, 16-Sep-2026 and 17-Sep-2026 received no response.
+F4.0.4.32 was published on 21-Sep-2026, recorded in CHANGES as a single line
+naming the bug class, without the CVE identifier or any credit. No fix is
+available for the archived Facebook fork.
+
+VIII. References
+
+* CWE-134: Use of Externally-Controlled Format String
+  https://cwe.mitre.org/data/definitions/134.html
+* RFC 9887: TACACS+ over TLS 1.3 (Standards Track, December 2025)
+  https://www.rfc-editor.org/rfc/rfc9887.html
+* Shrubbery Networks tac_plus: https://www.shrubbery.net/tac_plus/
+* Facebook tac_plus (archived): https://github.com/facebook/tac_plus
+* An Analysis of TACACS+ Protocol Security, Solar Designer, Openwall, 2000
+  https://www.openwall.com/articles/TACACS+-Protocol-Security
+  (documents offline recovery of the key from captured traffic; the oracle
+  in section III removes the need to capture any)
+* Affected source: packet.c (send_authen_error at packet.c:238,
+  get_authen_continue at packet.c:61, md5_xor, read_packet, write_packet),
+  report.c (report), authen.c:108-114 (session.port from the NAS port
+  field), authen.c:authen (reaches send_authen_error pre-authentication)
+* Affected version string: version.h.in -> version[] = "F4.0.4.31"
+* Fixed release: tacacs-F4.0.4.32.tar.gz, published 21-Sep-2026,
+  MD5 d380e9005363f4e9f25bf1b40cf4cab7,
+  SHA256 ee3e403a079c75cad13ce9e451c1af0115b0647142765bbd85e60d7a9f3f3fd2
