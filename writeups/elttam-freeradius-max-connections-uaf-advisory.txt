@@ -1,0 +1,136 @@
+=============================================================================
+                                                            Security Advisory
+                                                                       elttam
+
+Topic:          Use-after-free in FreeRADIUS when a TCP listener's
+                max_connections limit is reached (CWE-416, CWE-825)
+
+Module:         src/lib/io/master.c - mod_read() / mod_close()
+
+CVE:            None assigned. The issue affects only the unreleased
+                v4 development branch, and no CVE was requested.
+Severity:       High - CVSS v3.1 8.1
+                (AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H, elttam assessment)
+
+Disclosed:      03-Nov-2026 (security@freeradius.org)
+Fixed:          03-Nov-2026, upstream commit d3741307cd2f35d
+                (v4 development branch)
+Credits:        Matt Jones, elttam
+
+Affects:        FreeRADIUS v4 development branch (`master`), confirmed at
+                commit 253901dfdcafc802cc298e1f8e01b5921ee14894. There is
+                no stable 4.x release at the time of writing, so no
+                released version is affected. FreeRADIUS v3.x does not
+                contain this code. Requires a
+                TCP listener with a `max_connections` limit and a client
+                defined with `proto = tcp`. In elttam's testing, the stock
+                `proto = *` localhost client did not reach this path.
+
+-----------------------------------------------------------------------------
+
+I.   Background
+
+FreeRADIUS TCP listeners can cap simultaneous connections. Each accepted
+connection is allocated against its parent client state on the master
+listener.
+
+II.  Problem Description
+
+    master.c:1900-1907  if (!connection) { ... return -1; }
+
+When fr_io_connection_alloc() refuses a connection at the limit, it has
+already closed the fd (master.c:687). mod_read() then returns -1 for the
+master listener. In network.c:1014-1018, fr_network_read() treats that
+as a dead socket and tears down the master listener, freeing every
+fr_io_client_t under it. Other rejection paths in mod_read() (e.g.
+master.c:1798, 1868) return 0 instead.
+
+Live child connections keep a raw connection->parent pointer and later
+dereference it:
+
+    master.c:2066  fr_timer_armed(connection->parent->ev)     /* mod_read */
+    master.c:3139  pthread_mutex_lock(&connection->parent->mutex)
+                                                              /* mod_close */
+
+III. Impact
+
+    * A peer able to open TCP connections from a client address covered
+      by the limit can crash radiusd. It opens one more connection than
+      `max_connections` allows, then closes or sends on an existing one.
+      No RADIUS packet or shared secret is needed for the abort variant.
+      elttam reproduced this in 100% of 275+ trials.
+
+    * Even without the crash, tearing down the master listener stops the
+      server accepting new TCP connections.
+
+    * On production builds, connections closed without traffic abort via
+      talloc's magic check. Connections that had sent a request instead
+      segfault on an indirect call through a function pointer read from
+      the freed client's hash table (hash.c:607, 57 of 57 core dumps).
+
+    * elttam developed a working proof-of-concept exploit for this issue
+      that achieves code execution in the radiusd process. Technical
+      details are withheld.
+
+IV.  Solution
+
+Fixed upstream in commit d3741307cd2f35dc5253088d9c5f5cd0999c7c24
+("return \"nope\" on alloc failure, not \"close connection\""), committed
+by Alan DeKok on 03-Nov-2026. Users of the v4 development branch should
+update to a build that includes it. As there is no v4 release and no CVE,
+there is no release or advisory ID to track.
+
+Root cause: on accept failure, mod_read() returns -1 for the master
+listener.
+
+    master.c:1906   -  return -1;
+                    +  return 0;    /* fd already closed by
+                                       fr_io_connection_alloc() */
+
+This matches the other rejected-connection paths in mod_read().
+fr_io_connection_alloc() closes the fd on every failure path
+(master.c:687, 1046), so returning 0 does not leak the descriptor. The
+upstream fix is this one-line change. elttam has not tested it.
+
+As defence in depth, child connections should not hold an unreferenced
+pointer to a parent that can be freed under them. One option is a
+per-client count of child connections: increment it in
+fr_io_connection_alloc(), decrement it in mod_close(), and defer freeing
+the parent (via the existing `ready_to_delete` timer) until it reaches
+zero.
+
+V.   Workarounds
+
+Remove `max_connections` limits from TCP listeners and `proto = tcp`
+clients, or restrict the TCP listener to trusted NAS addresses. Removing
+the limit also removes a resource control.
+
+VI.  Detection
+
+"'max_connections' limit reached" in the radiusd log, followed by
+"Bad talloc magic value" or a SIGSEGV.
+
+VII. Timeline
+
+    * 29-Oct-2026: Issue identified and confirmed under ASan and on a
+                   production-flag build.
+    * 02-Nov-2026: Advisory drafted.
+    * 02-Nov-2026: Proof-of-concept exploit developed.
+    * 03-Nov-2026: Advisory sent to FreeRADIUS security team.
+    * 03-Nov-2026: Fix committed upstream (d3741307cd2f35d).
+
+VIII. References
+
+    * CWE-416: Use After Free
+      https://cwe.mitre.org/data/definitions/416.html
+    * CWE-825: Expired Pointer Dereference
+      https://cwe.mitre.org/data/definitions/825.html
+
+    * Upstream fix:
+      https://github.com/FreeRADIUS/freeradius-server/commit/d3741307cd2f35d
+
+    Affected source: src/lib/io/master.c:1900-1907,2066,3139;
+    src/lib/io/network.c:1014-1018
+    (commit 253901dfdcafc802cc298e1f8e01b5921ee14894)
+
+=============================================================================

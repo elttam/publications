@@ -6,6 +6,10 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 
 | Date | Type | Event | Title | Resources |
 |------| ---- | ----- | ----- | --------- |
+| 2026 | preso | BSides Perth | Nobody's Protocol: Attacking TACACS+ in 2026 | [slides](./slides/Nobody’s%20Protocol%20Attacking%20TACACS+%20in%202026.pdf) |
+| 2026 | preso | BSides Perth | Golang Code Review Notes | [tac_plus_rce_fmtstring](./slides/Golang%20Code%20Review%20Notes%20-%20Bsides%20Perth.pdf) |
+| 2026 | adv | - | Use-after-free in FreeRADIUS when a TCP listener's max_connections limit is reached | [advisory](./writeups/elttam-freeradius-max-connections-uaf-advisory.txt) | 
+| 2026 | adv | - | sqlite3-ruby: Possible SQL query truncation when a string is 4 GiB or larger | [GHSA-4fqr-96q8-xrfx](https://github.com/advisories/GHSA-4fqr-96q8-xrfx) | 
 | 2026 | adv | - | SSRF on Nextcloud Whiteboard Application via Recorder | [CVE-2026-87897](./writeups/CVE-2026-87897.txt), [GHSA-g8qc-xvwr-f684](https://github.com/nextcloud/security-advisories/security/advisories/GHSA-g8qc-xvwr-f684) | 
 | 2026 | adv | - | Remote pre-authentication format string vulnerability in tac_plus (CVE-pending) | [tac_plus_rce_fmtstring](./writeups/elttam-tac_plus_rce_fmtstring_advisory.txt) | 
 | 2026 | preso | Sectalks Perth | Your House has an FFMpeg Problem | [pdf slides](./slides/Your_House_Has_An_FFmpeg_Problem.pptx.pdf) |
