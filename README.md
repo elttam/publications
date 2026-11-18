@@ -13,7 +13,7 @@ For blog posts, see [the elttam blog](https://www.elttam.com/blog), and for our 
 | 2026 | adv | - | SSRF on Nextcloud Whiteboard Application via Recorder | [CVE-2026-87897](./writeups/CVE-2026-87897.txt), [GHSA-g8qc-xvwr-f684](https://github.com/nextcloud/security-advisories/security/advisories/GHSA-g8qc-xvwr-f684) | 
 | 2026 | adv | - | Remote pre-authentication format string vulnerability in tac_plus (CVE-pending) | [tac_plus_rce_fmtstring](./writeups/elttam-tac_plus_rce_fmtstring_advisory.txt) | 
 | 2026 | preso | Sectalks Perth | Your House has an FFMpeg Problem | [pdf slides](./slides/Your_House_Has_An_FFmpeg_Problem.pptx.pdf) |
-| 2026 | preso | BSides Adelaide | Gatecrash: Jupyter Enterprise Gateway  | [pdf slides](./slides/gatecrash) |
+| 2026 | preso | BSides Adelaide | Gatecrash: Jupyter Enterprise Gateway  | [pdf slides](./slides/gatecrash-jupter-enterprise-gateway-bsides-adelaide-2026.pdf) |
 | 2026 | preso | ACISP | Offensive Security Considered Offensive | [pdf slides](./slides/acisp_talk_final.pdf) |
 | 2026 | adv | - | Multiple vulnerabilities in Jupyter Enterprise Gateway | [jupyter-server/enterprise-gateway/](./writeups/jupyter-server/enterprise-gateway/) |
 | 2025 | preso | Blackhat EU | ORMageddon - Leaking More Than You Joined For | [ppt slides](./slides/EU-25-Brown-ORMageddon-Wednesday.pptx) | 
